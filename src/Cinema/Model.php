@@ -157,7 +157,7 @@ class Model
     */
     public function getCritiques($filmId)
     {
-      $sql = $this->getCritiquesSQL().'WHERE critiques.film_id = :film_id';
+      $sql = $this->getCritiquesSQL().'WHERE critiques.film_id = film_id';
       $query = $this->pdo->prepare($sql);
 
       return $query->execute(array('film_id' => $filmId));
