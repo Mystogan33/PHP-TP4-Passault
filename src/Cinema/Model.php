@@ -69,15 +69,29 @@ class Model
     /**
      * Récupère un film
      */
-    public function getFilm($id)
+    public function getFilm($FilmId)
     {
-        $sql = $this->getFilmSQL().'WHERE films.id = ?';
+        $sql = $this->getFilmSQL().'WHERE films.id = '.$FilmId;
 
         $query = $this->pdo->prepare($sql);
-        $this->execute($query, array($id));
+        $query->execute(array('id' => $FilmId));
 
         return $this->fetchOne($query);
     }
+
+    /**
+    * Récupérer tout les films d'un genre
+    */
+    public function getFilmsParGenre($GenreId)
+    {
+        $sql = getFilmSQL()."WHERE genres.id = ".$GenreId;
+
+        $query = $this->pdo->prepare($sql);
+
+        return $query->execute(array('id' => $GenreId));
+
+    }
+
 
     /**
     * Requête SQL pour récupérer le casting d'un film
@@ -95,9 +109,9 @@ class Model
     public function getCasting($filmId)
     {
 
-      $sql = $this->getCastingSQL().'WHERE films.id = film_id';
+      $sql = $this->getCastingSQL().'WHERE films.id = '.$filmId;
 
-        return $this->execute($this->pdo->prepare($sql))
+        return $this->execute($this->pdo->prepare($sql));
     }
 
     /**
@@ -105,7 +119,7 @@ class Model
     */
     public function setCritiqueSQL($nom , $critique , $note , $filmId)
     {
-      return 'INSERT INTO critiques (nom,commentaire,note,film_id) VALUES ('".$nom."','".$critique."','".$note."','".$filmId."')';
+      return "INSERT INTO critiques (nom,commentaire,note,film_id) VALUES ('".$nom."','".$critique."','".$note."','".$filmId."')";
     }
 
     /**
@@ -113,6 +127,8 @@ class Model
     */
     public function setCritique($post , $filmId)
     {
+        $nom = $note = $critique = "vide";
+
       // Tri des données du formulaire $post
       foreach ($post as $champPost => $valeur)
       {
@@ -157,10 +173,21 @@ class Model
     */
     public function getCritiques($filmId)
     {
-      $sql = $this->getCritiquesSQL().'WHERE critiques.film_id = film_id';
+      $sql = $this->getCritiquesSQL().'WHERE critiques.film_id = '.$filmId ;
       $query = $this->pdo->prepare($sql);
 
       return $query->execute(array('film_id' => $filmId));
+    }
+
+    /**
+     * Requête SQL permettant de récuperer les genres de films
+     */
+    public function getGenresSQL()
+    {
+      return
+          'SELECT genres.nom, COUNT(*) as nb_films FROM genres '.
+          'INNER JOIN films ON films.genre_id = genres.id '.
+          'GROUP BY genres.id';
     }
 
     /**
@@ -168,11 +195,7 @@ class Model
      */
     public function getGenres()
     {
-        $sql =
-            'SELECT genres.nom, COUNT(*) as nb_films FROM genres '.
-            'INNER JOIN films ON films.genre_id = genres.id '.
-            'GROUP BY genres.id'
-            ;
+        $sql = getGenresSQL();
 
         return $this->execute($this->pdo->prepare($sql));
     }

@@ -31,6 +31,14 @@ $app->match('/films', function() use ($app) {
     ));
 })->bind('films');
 
+// Liste des films par genre
+$app->match('/filmsParGenre', function() use ($app) {
+    return $app['twig']->render('filmsParGenre.html.twig', array(
+        'filmsParGenre' => $app['model']->getFilmsParGenre($id),
+        'casting' => $app['model']->getCasting($id)
+    ));
+})->bind('filmsParGenre');
+
 // Fiche film
 $app->match('/film/{id}', function($id) use ($app) {
     $request = $app['request'];
